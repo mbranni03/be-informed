@@ -15,7 +15,7 @@
               <!-- State Indicator -->
               <div v-if="store.userState" class="state-badge">
                 <span class="badge-dot"></span>
-                <span>Your Location: {{ selectedStateName }}</span>
+                <span>Your Location: {{ store.userState }}</span>
               </div>
             </div>
             <div class="header-tools">
