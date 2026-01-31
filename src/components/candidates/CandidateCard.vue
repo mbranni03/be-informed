@@ -1,5 +1,9 @@
 <template>
-  <div class="insight-card group" :class="{ 'is-incumbent': candidate.incumbent }">
+  <div
+    class="insight-card group cursor-pointer"
+    :class="{ 'is-incumbent': candidate.incumbent }"
+    @click="navigateToOverview"
+  >
     <div class="card-glow"></div>
     <div class="card-content">
       <div class="avatar-section">
@@ -28,10 +32,10 @@
           </p>
         </div>
 
-        <div class="stance-box">
+        <!-- <div class="stance-box">
           <p class="stance-label">Platform Focus</p>
           <p class="stance-text text-truncate-2">{{ candidate.bio }}</p>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -39,6 +43,7 @@
 
 <script setup>
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 
 const props = defineProps({
   candidate: {
@@ -46,6 +51,14 @@ const props = defineProps({
     required: true,
   },
 })
+
+const router = useRouter()
+
+const navigateToOverview = () => {
+  if (props.candidate.id) {
+    router.push(`/candidates/${props.candidate.id}`)
+  }
+}
 
 const shouldShowDistrict = computed(() => {
   const office = props.candidate.office.toLowerCase()
@@ -246,5 +259,9 @@ const formatOffice = (office) => {
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+}
+
+.cursor-pointer {
+  cursor: pointer;
 }
 </style>

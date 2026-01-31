@@ -8,13 +8,12 @@
         </div>
 
         <h1 class="hero-title">
-          Be <span class="text-blue">Informed</span>.<br />
+          Be <span class="gradient-text">Informed</span>.<br />
           Vote <span class="text-italic">Wise</span>.
         </h1>
 
         <p class="hero-subtitle">
-          Initializing the 2026 Midterm Intelligence Node. Access interactive candidate telemetry,
-          verified platform auditing, and localized district analytics.
+          An LLM Powered Platform to Inform Your Vote for the 2026 Midterm Elections.
         </p>
 
         <div class="hero-actions">
@@ -36,7 +35,6 @@
               <polyline points="12 5 19 12 12 19"></polyline>
             </svg>
           </router-link>
-          <a href="#" class="cta-secondary">System Audit</a>
         </div>
       </div>
     </div>
@@ -112,13 +110,6 @@
   color: #111827;
   text-transform: uppercase;
   margin-bottom: 2rem;
-}
-
-.hero-title .text-blue {
-  color: transparent;
-  background: linear-gradient(to right, var(--blue-600), var(--blue-400));
-  -webkit-background-clip: text;
-  background-clip: text;
 }
 
 .hero-title .text-italic {

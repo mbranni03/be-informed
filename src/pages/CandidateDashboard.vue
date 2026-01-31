@@ -12,59 +12,88 @@
                 <span class="divider"></span>
                 Nov 2026
               </p>
+              <!-- State Indicator -->
+              <div v-if="store.userState" class="state-badge">
+                <span class="badge-dot"></span>
+                <span>Your Location: {{ selectedStateName }}</span>
+              </div>
+            </div>
+            <div class="header-tools">
+              <div class="zip-search">
+                <div class="search-label">Local Intelligence</div>
+                <div class="zip-input-group compact">
+                  <div v-if="store.userZip" class="user-zip-tag">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                      <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    {{ store.userZip }}
+                  </div>
+                  <input
+                    v-model="zipCode"
+                    type="text"
+                    placeholder="Search Zip Code"
+                    class="zip-input"
+                    maxlength="5"
+                    @keyup.enter="handleZipSubmit"
+                  />
+                  <button
+                    v-if="store.userZip && selectedState !== store.userState"
+                    class="zip-reset"
+                    @click="store.lookupByZip(store.userZip)"
+                    title="Reset to Home"
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2.5"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="23 4 23 10 17 10"></polyline>
+                      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+                    </svg>
+                  </button>
+                  <button class="zip-submit" @click="handleZipSubmit" :disabled="store.loading">
+                    <svg
+                      v-if="!store.loading"
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="3"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="11" cy="11" r="8"></circle>
+                      <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <q-spinner v-else size="16px" />
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
           <USMap />
 
-          <div class="projection-grid">
-            <div class="projection-card group">
-              <div class="icon-box blue">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
-                  <polyline points="16 7 22 7 22 13"></polyline>
-                </svg>
-              </div>
-              <h4 class="card-title">House Projection</h4>
-              <p class="card-desc">
-                Current models indicate a +4 shift in suburban districts across the Midwest. 12
-                districts remain within the margin of error.
-              </p>
-            </div>
-            <div class="projection-card group">
-              <div class="icon-box red">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                  <line x1="16" y1="2" x2="16" y2="6"></line>
-                  <line x1="8" y1="2" x2="8" y2="6"></line>
-                  <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
-              </div>
-              <h4 class="card-title">Voter Deadline</h4>
-              <p class="card-desc">
-                Early registration closes in 42 days for most battleground states. Request your
-                mail-in ballots before October 5th.
-              </p>
-            </div>
+          <div class="status-section mb-6">
+            <MidtermStatus />
           </div>
         </div>
 
@@ -73,12 +102,20 @@
           <div class="sidebar-wrapper">
             <!-- Profile Header -->
             <div class="sidebar-header">
-              <h2 class="sidebar-title">{{ store.selectedState || 'United States' }}</h2>
+              <h2 class="sidebar-title">
+                {{
+                  activeTab === 'local' ? store.userState : store.selectedState || 'United States'
+                }}
+              </h2>
               <div
-                v-if="store.selectedStateName && store.selectedState"
+                v-if="activeTab !== 'local' && store.selectedStateName && store.selectedState"
                 class="sidebar-subtitle-text"
               >
                 {{ store.selectedStateName }}
+              </div>
+              <div v-else-if="activeTab === 'local' && store.userDistrict" class="location-banner">
+                <span class="banner-label">District</span>
+                <span class="banner-value">{{ store.userDistrict }}</span>
               </div>
               <div class="title-underline"></div>
             </div>
@@ -86,13 +123,26 @@
             <!-- Tabs -->
             <div class="sidebar-tabs">
               <button
-                v-for="tab in ['senate', 'house']"
-                :key="tab"
                 class="tab-btn"
-                :class="{ active: activeTab === tab }"
-                @click="activeTab = tab"
+                :class="{ active: activeTab === 'senate' }"
+                @click="activeTab = 'senate'"
               >
-                {{ tab }}
+                Senate
+              </button>
+              <button
+                class="tab-btn"
+                :class="{ active: activeTab === 'house' }"
+                @click="activeTab = 'house'"
+              >
+                House
+              </button>
+              <button
+                v-if="store.userState"
+                class="tab-btn"
+                :class="{ active: activeTab === 'local' }"
+                @click="activeTab = 'local'"
+              >
+                My Location
               </button>
             </div>
 
@@ -103,6 +153,13 @@
             >
               <div class="filter-label">Districts</div>
               <div class="filter-scroll scrollbar-hide">
+                <button
+                  class="dist-chip"
+                  :class="{ active: store.filters.district === 'all' }"
+                  @click="store.setFilter('district', 'all')"
+                >
+                  All
+                </button>
                 <button
                   v-for="dist in availableDistricts"
                   :key="dist"
@@ -117,6 +174,39 @@
 
             <!-- Content Area -->
             <div class="sidebar-content scrollbar-hide">
+              <!-- Current Legislators Section -->
+              <div
+                v-if="activeTab === 'local' && store.currentLegislators.length > 0"
+                class="current-legislators-section mb-8"
+              >
+                <div class="stream-label">
+                  <div class="active-dot gray"></div>
+                  <span>Current Representatives</span>
+                </div>
+                <div class="legislator-grid">
+                  <div
+                    v-for="leg in store.currentLegislators"
+                    :key="leg.references.bioguide_id"
+                    class="legislator-mini-card"
+                  >
+                    <div class="leg-avatar-container" v-if="leg.bio.photo_url">
+                      <img
+                        :src="leg.bio.photo_url"
+                        :alt="leg.bio.last_name"
+                        class="leg-avatar-img"
+                      />
+                    </div>
+                    <div class="leg-info">
+                      <div class="leg-name">{{ leg.bio.first_name }} {{ leg.bio.last_name }}</div>
+                      <div class="leg-office">{{ leg.type }}</div>
+                    </div>
+                    <div class="leg-party" :class="leg.bio.party?.toLowerCase()">
+                      {{ leg.bio.party?.[0] || 'I' }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div v-if="store.loading" class="loading-state">
                 <q-spinner-dots color="primary" size="40px" />
                 <p>Retrieving Intelligence...</p>
@@ -136,15 +226,15 @@
                 <p>Select a state on the map to begin intelligence briefing</p>
               </div>
 
-              <div v-else-if="activeTab === 'senate'" class="content-stream">
-                <template v-if="filteredCandidates.length > 0">
+              <div v-if="activeTab === 'senate'" class="content-stream">
+                <template v-if="regionalSenate.length > 0">
                   <div class="stream-label">
                     <div class="active-dot"></div>
                     <span>Active Candidates</span>
                   </div>
                   <div class="candidate-stack">
                     <CandidateCard
-                      v-for="candidate in filteredCandidates"
+                      v-for="candidate in regionalSenate"
                       :key="candidate.id"
                       :candidate="candidate"
                     />
@@ -170,17 +260,24 @@
                   </div>
                   <p class="inactive-title">Cycle Inactive</p>
                   <p class="inactive-desc">
-                    The candidates for {{ selectedStateName || 'this region' }} are not currently
+                    The senators for {{ selectedStateName || 'this region' }} are not currently
                     loaded or the cycle is inactive.
                   </p>
                 </div>
               </div>
 
-              <div v-else class="content-stream">
-                <template v-if="filteredCandidates.length > 0">
+              <div v-else-if="activeTab === 'house'" class="content-stream">
+                <template v-if="regionalHouse.length > 0">
+                  <div class="stream-label">
+                    <div class="active-dot blue"></div>
+                    <span v-if="store.filters.district !== 'all'"
+                      >District {{ store.filters.district }}</span
+                    >
+                    <span v-else>All Districts</span>
+                  </div>
                   <div class="candidate-stack">
                     <CandidateCard
-                      v-for="candidate in filteredCandidates"
+                      v-for="candidate in regionalHouse"
                       :key="candidate.id"
                       :candidate="candidate"
                     />
@@ -209,6 +306,67 @@
                   </p>
                 </div>
               </div>
+
+              <div v-else-if="activeTab === 'local'" class="content-stream">
+                <!-- Local Senate Section -->
+                <template v-if="localSenate.length > 0">
+                  <div class="stream-label">
+                    <div class="active-dot"></div>
+                    <span>Your U.S. Senators</span>
+                  </div>
+                  <div class="candidate-stack mb-8">
+                    <CandidateCard
+                      v-for="candidate in localSenate"
+                      :key="candidate.id"
+                      :candidate="candidate"
+                    />
+                  </div>
+                </template>
+
+                <!-- Local House Section -->
+                <template v-if="localHouse.length > 0">
+                  <div class="stream-label">
+                    <div class="active-dot blue"></div>
+                    <span>Your District: {{ store.userDistrict }}</span>
+                  </div>
+                  <div class="candidate-stack">
+                    <CandidateCard
+                      v-for="candidate in localHouse"
+                      :key="candidate.id"
+                      :candidate="candidate"
+                    />
+                  </div>
+                </template>
+
+                <!-- No local candidates fallback -->
+                <div
+                  v-if="localSenate.length === 0 && localHouse.length === 0"
+                  class="inactive-state"
+                >
+                  <div class="inactive-icon">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="40"
+                      height="40"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <circle cx="12" cy="12" r="10"></circle>
+                      <line x1="12" y1="8" x2="12" y2="12"></line>
+                      <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                  </div>
+                  <p class="inactive-title">No Local Elections</p>
+                  <p class="inactive-desc">
+                    There are no active midterm elections scheduled for your specific district in
+                    the 2026 cycle.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </aside>
@@ -218,12 +376,33 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import USMap from 'src/components/USMap.vue'
+import MidtermStatus from 'src/components/MidtermStatus.vue'
 import CandidateCard from 'components/candidates/CandidateCard.vue'
 import { useElectionStore } from 'stores/election-store'
 const store = useElectionStore()
 const activeTab = ref('senate')
+const zipCode = ref('')
+
+onMounted(async () => {
+  await store.initFromCookies()
+  if (store.userZip) {
+    zipCode.value = store.userZip
+    activeTab.value = 'local'
+  }
+})
+
+const handleZipSubmit = async () => {
+  if (!zipCode.value || zipCode.value.length < 5) return
+
+  try {
+    await store.lookupByZip(zipCode.value)
+    activeTab.value = 'local'
+  } catch (err) {
+    console.error('Zip lookup failed', err)
+  }
+}
 
 const selectedState = computed(() => store.selectedState)
 const selectedStateName = computed(() => store.selectedStateName)
@@ -246,32 +425,42 @@ const availableDistricts = computed(() => {
 
 // Set default district when switching to house or when available districts change
 watch(
-  [activeTab, availableDistricts],
-  ([newTab, districts]) => {
-    if (newTab === 'house') {
-      // If no district is selected or the current one isn't available, default to '1' or the first one
-      const currentDist = store.filters.district
-      const hasCurrent = districts.some((d) => d == currentDist)
-
-      if (!hasCurrent || currentDist === 'all') {
-        const defaultDist = districts.find((d) => d == '1' || d == '01') || districts[0] || '1'
-        store.setFilter('district', defaultDist)
-      }
-    } else {
-      store.setFilter('district', 'all')
-    }
+  [selectedState, availableDistricts],
+  () => {
+    // Reset district filter when state changes
+    store.setFilter('district', 'all')
   },
   { immediate: true },
 )
 
-// Keep filteredCandidates logic, but ensure it filters by activeTab and district
-const filteredCandidates = computed(() => {
+const regionalSenate = computed(() => {
+  return store.candidates.filter(
+    (c) => c.state === selectedState.value && c.office.toLowerCase() === 'senate',
+  )
+})
+
+const regionalHouse = computed(() => {
   return store.candidates.filter((c) => {
-    const matchesState = !selectedState.value || c.state === selectedState.value
-    const matchesOffice = c.office.toLowerCase() === activeTab.value
-    const matchesDistrict = activeTab.value !== 'house' || c.district == store.filters.district
-    return matchesState && matchesOffice && matchesDistrict
+    const matchesState = c.state === selectedState.value
+    const isHouse = c.office.toLowerCase() === 'house'
+    const matchesDistrict = store.filters.district === 'all' || c.district == store.filters.district
+    return matchesState && isHouse && matchesDistrict
   })
+})
+
+const localSenate = computed(() => {
+  return store.localCandidates.filter(
+    (c) => c.state === store.userState && c.office.toLowerCase() === 'senate',
+  )
+})
+
+const localHouse = computed(() => {
+  return store.localCandidates.filter(
+    (c) =>
+      c.state === store.userState &&
+      c.office.toLowerCase() === 'house' &&
+      c.district == store.userDistrict,
+  )
 })
 </script>
 
@@ -343,6 +532,30 @@ const filteredCandidates = computed(() => {
   font-style: italic;
   line-height: 1;
   color: #111827;
+}
+
+.state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 9999px;
+  margin-top: 1rem;
+  font-size: 11px;
+  font-weight: 800;
+  color: #166534;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  background-color: #22c55e;
+  border-radius: 9999px;
+  box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.2);
 }
 
 @media (min-width: 768px) {
@@ -512,6 +725,213 @@ const filteredCandidates = computed(() => {
   border-radius: 9999px;
 }
 
+.active-dot.gray {
+  background-color: #9ca3af;
+}
+
+.header-tools {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .header-tools {
+    width: auto;
+  }
+}
+
+.zip-search {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.search-label {
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: #9ca3af;
+  margin-left: 0.5rem;
+}
+
+.zip-input-group {
+  display: flex;
+  background: white;
+  border-radius: 1.25rem;
+  padding: 0.375rem;
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .zip-input-group {
+    width: 320px;
+  }
+}
+
+.zip-input-group:focus-within {
+  border-color: #111827;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08);
+}
+
+.user-zip-tag {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.625rem;
+  background: #f1f5f9;
+  border-radius: 0.75rem;
+  margin-left: 0.25rem;
+  font-size: 11px;
+  font-weight: 800;
+  color: #64748b;
+  border: 1px solid #e2e8f0;
+}
+
+.zip-reset {
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-radius: 0.5rem;
+}
+
+.zip-reset:hover {
+  background: #f9fafb;
+  color: #111827;
+}
+
+.zip-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.5rem 1rem;
+  font-size: 14px;
+  font-weight: 700;
+  color: #111827;
+  outline: none;
+  min-width: 0;
+}
+
+.zip-input::placeholder {
+  color: #9ca3af;
+}
+
+.zip-submit {
+  width: 3rem;
+  height: 3rem;
+  border-radius: 0.75rem;
+  background: #111827;
+  color: white;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.zip-submit:hover:not(:disabled) {
+  background: var(--blue-600);
+  transform: scale(1.05);
+}
+
+.zip-submit:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.current-legislators-section {
+  margin-bottom: 2.5rem;
+  background: #f9fafb;
+  padding: 1.5rem;
+  border-radius: 1.5rem;
+  border: 1px solid #f3f4f6;
+}
+
+.legislator-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.legislator-mini-card {
+  display: flex;
+  align-items: center;
+  background: white;
+  padding: 0.75rem 1rem;
+  border-radius: 0.875rem;
+  border: 1px solid #f3f4f6;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.leg-name {
+  font-size: 13px;
+  font-weight: 800;
+  color: #111827;
+  line-height: 1.2;
+}
+
+.leg-avatar-container {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  margin-right: 0.75rem;
+  background: #f3f4f6;
+  flex-shrink: 0;
+}
+
+.leg-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.leg-office {
+  font-size: 11px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.leg-party {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 0.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 900;
+  color: white;
+  background: #9ca3af;
+}
+
+.leg-party.democrat,
+.leg-party.d {
+  background-color: #2563eb;
+}
+
+.leg-party.republican,
+.leg-party.r {
+  background-color: #dc2626;
+}
+
+.leg-info {
+  flex: 1;
+}
 .sidebar-tabs {
   display: flex;
   padding: 0 1.5rem;
@@ -627,8 +1047,12 @@ const filteredCandidates = computed(() => {
 .active-dot {
   width: 0.5rem;
   height: 0.5rem;
-  background-color: var(--blue-500);
+  background-color: var(--red-500);
   border-radius: 9999px;
+}
+
+.active-dot.blue {
+  background-color: var(--blue-500);
 }
 
 .stream-label span {
@@ -646,7 +1070,7 @@ const filteredCandidates = computed(() => {
 }
 
 .inactive-state {
-  padding: 6rem 0;
+  padding: 10px 0;
   text-align: center;
 }
 
@@ -784,5 +1208,29 @@ const filteredCandidates = computed(() => {
   font-size: 14px;
   max-width: 15rem;
   line-height: 1.5;
+}
+
+.location-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.banner-label {
+  font-size: 10px;
+  font-weight: 900;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.banner-value {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--blue-600);
+  background: #eff6ff;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.375rem;
 }
 </style>

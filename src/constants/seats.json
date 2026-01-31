@@ -1,0 +1,59 @@
+{
+  "last_updated": "2026-01-30",
+  "election_cycle": 2026,
+  "chambers": {
+    "senate": {
+      "total_seats_up": 35,
+      "regularly_scheduled": 33,
+      "special_elections": 2,
+      "open_seats": {
+        "total": 9,
+        "democrats": 4,
+        "republicans": 5,
+        "notable_retirements": [
+          "Dick Durbin (D-IL)",
+          "Gary Peters (D-MI)",
+          "Tina Smith (D-MN)",
+          "Jeanne Shaheen (D-NH)",
+          "Tommy Tuberville (R-AL)",
+          "Joni Ernst (R-IA)",
+          "Mitch McConnell (R-KY)",
+          "Thom Tillis (R-NC)",
+          "Cynthia Lummis (R-WY)"
+        ]
+      },
+      "current_vacancies": 0,
+      "partisan_breakdown": {
+        "republicans": 53,
+        "democrats": 45,
+        "independents": 2
+      }
+    },
+    "house": {
+      "total_seats_up": 435,
+      "open_seats": {
+        "total": 49,
+        "democrats": 21,
+        "republicans": 28,
+        "status": {
+          "retiring_from_public_office": 22,
+          "seeking_other_office": 27
+        }
+      },
+      "current_vacancies": {
+        "total": 4,
+        "districts": [
+          "CA-01 (LaMalfa - Death)",
+          "GA-14 (Greene - Resigned)",
+          "NJ-11 (Sherrill - Resigned)",
+          "TX-18 (Turner - Death)"
+        ]
+      },
+      "partisan_breakdown": {
+        "republicans": 218,
+        "democrats": 213,
+        "vacant": 4
+      }
+    }
+  }
+}

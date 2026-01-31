@@ -36,7 +36,7 @@ async function apiRequest(endpoint, options = {}) {
 
     // Handle text responses (e.g., Mermaid graph)
     const contentType = response.headers.get('content-type')
-    if (contentType?.includes('text/plain')) {
+    if (contentType?.includes('text/plain') || contentType?.includes('text/markdown')) {
       return await response.text()
     }
 
@@ -67,6 +67,28 @@ export async function getStateCandidates(state, office, district) {
   const endpoint = `/candidates/${state}${queryString ? `?${queryString}` : ''}`
 
   return await apiRequest(endpoint)
+}
+
+export async function getCandidateOverview({ candidate, state, office, bioguideId }) {
+  const params = new URLSearchParams()
+  if (candidate) params.append('candidate', candidate)
+  if (state) params.append('state', state)
+  if (office) params.append('office', office)
+  if (bioguideId) params.append('bioguideId', bioguideId)
+
+  const queryString = params.toString()
+  return await apiRequest(`/candidate/overview${queryString ? `?${queryString}` : ''}`)
+}
+
+export async function lookupDistrict(zip) {
+  return await apiRequest(`/user/district/${zip}`)
+}
+
+export async function saveApiKeys(keys) {
+  return await apiRequest('/keys', {
+    method: 'POST',
+    body: JSON.stringify(keys),
+  })
 }
 
 export { InformedAPIError }

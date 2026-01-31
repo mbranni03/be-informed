@@ -14,13 +14,23 @@
               <stop offset="0%" style="stop-color: #2563eb; stop-opacity: 1" />
               <stop offset="100%" style="stop-color: #3b82f6; stop-opacity: 1" />
             </linearGradient>
+            <linearGradient id="userStateGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color: #059669; stop-opacity: 1" />
+              <stop offset="100%" style="stop-color: #10b981; stop-opacity: 1" />
+            </linearGradient>
           </defs>
           <g class="states">
             <path
               v-for="state in statePaths"
               :key="state.id"
               :d="state.path"
-              :class="['state', { 'is-selected': selectedCode === state.code }]"
+              :class="[
+                'state',
+                {
+                  'is-selected': selectedCode === state.code,
+                  'is-user-state': store.userState === state.code,
+                },
+              ]"
               @mouseenter="hoveredStateName = state.name"
               @mouseleave="hoveredStateName = null"
               @click="handleStateClick(state)"
@@ -31,6 +41,21 @@
             </path>
           </g>
         </svg>
+
+        <Transition name="fade">
+          <div v-if="store.userState" class="absolute-bottom-left q-pa-md pointer-events-none">
+            <div class="map-legend">
+              <div class="legend-item">
+                <span class="legend-dot user"></span>
+                <span class="legend-text">Your State</span>
+              </div>
+              <div class="legend-item">
+                <span class="legend-dot selected"></span>
+                <span class="legend-text">Viewing</span>
+              </div>
+            </div>
+          </div>
+        </Transition>
 
         <Transition name="fade">
           <div v-if="hoveredStateName" class="absolute-bottom-right q-pa-md">
@@ -150,11 +175,58 @@ const handleStateClick = (state) => {
 
   &.is-selected {
     fill: url(#selectedGradient);
-    stroke: $primary;
+    stroke: #2563eb;
     stroke-width: 2;
-    filter: drop-shadow(0 0 12px rgba($primary, 0.5));
+    filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.5));
     z-index: 20;
   }
+
+  &.is-user-state:not(.is-selected) {
+    fill: #ecfdf5;
+    stroke: #10b981;
+    stroke-width: 2;
+  }
+}
+
+.map-legend {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(4px);
+  padding: 0.75rem 1rem;
+  border-radius: 1rem;
+  border: 1px solid #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.legend-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+}
+
+.legend-dot.user {
+  background-color: #10b981;
+  border: 1px solid #059669;
+}
+
+.legend-dot.selected {
+  background-color: #2563eb;
+  border: 1px solid #1d4ed8;
+}
+
+.legend-text {
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .letter-spacing-wide {

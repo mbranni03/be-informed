@@ -4,7 +4,17 @@
       <div class="navbar-container">
         <div class="header-content">
           <div class="logo-area" @click="$router.push('/')">
-            <div class="logo-icon-box">
+            <div class="logo-text-group">
+              <span class="logo-title">BE<span class="gradient-text"> INFORMED</span></span>
+              <div class="live-indicator">
+                <span class="pulse-dot"></span>
+                <span class="indicator-text">BETA</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="header-actions">
+            <button class="settings-trigger" @click="showSettings = true">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="20"
@@ -12,61 +22,84 @@
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2.5"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg>
-            </div>
-            <div class="logo-text-group">
-              <span class="logo-title">Informed<span class="gradient-text">.OS</span></span>
-              <div class="live-indicator">
-                <span class="pulse-dot"></span>
-                <span class="indicator-text">v2.06 Live Node</span>
-              </div>
-            </div>
-          </div>
-
-          <nav class="desktop-nav">
-            <router-link to="/" class="nav-item" :class="{ active: $route.path === '/' }">
-              Intelligence
-            </router-link>
-            <router-link
-              to="/candidates"
-              class="nav-item"
-              :class="{ active: $route.path === '/candidates' }"
-            >
-              Candidate Console
-            </router-link>
-            <a href="#" class="nav-item disabled">Briefings</a>
-          </nav>
-
-          <div class="header-status">
-            <div class="status-chip">
-              <span class="label">Region:</span>
-              <span class="val">US-EAST-1</span>
-            </div>
-            <button class="action-btn">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
                 stroke-width="2"
                 stroke-linecap="round"
                 stroke-linejoin="round"
               >
-                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
+                <path
+                  d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+                />
+                <circle cx="12" cy="12" r="3" />
               </svg>
             </button>
           </div>
         </div>
       </div>
     </header>
+
+    <q-dialog v-model="showSettings" persistent>
+      <q-card class="settings-card glass-modal">
+        <q-card-section class="row items-center q-pb-none">
+          <div class="text-h6 font-black gradient-text uppercase tracking-tighter">
+            API Configuration
+          </div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
+
+        <q-card-section class="q-pt-md">
+          <div class="settings-grid">
+            <div class="input-group">
+              <label>Geocodio API Key</label>
+              <q-input
+                v-model="tempKeys.geocodioApiKey"
+                filled
+                type="password"
+                placeholder="Enter key..."
+                bg-color="white"
+                dense
+              />
+            </div>
+
+            <div class="input-group">
+              <label>Gov Data API Key</label>
+              <q-input
+                v-model="tempKeys.govDataApiKey"
+                filled
+                type="password"
+                placeholder="Enter key..."
+                bg-color="white"
+                dense
+              />
+            </div>
+
+            <div class="input-group">
+              <label>Tavily API Key</label>
+              <q-input
+                v-model="tempKeys.tavilyApiKey"
+                filled
+                type="password"
+                placeholder="Enter key..."
+                bg-color="white"
+                dense
+              />
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-actions align="right" class="q-pa-md">
+          <q-btn flat label="Cancel" color="grey-7" v-close-popup />
+          <q-btn
+            unelevated
+            label="Save Config"
+            class="save-btn"
+            color="primary"
+            :loading="saving"
+            @click="saveSettings"
+          />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
 
     <main class="main-content">
       <router-view />
@@ -80,15 +113,44 @@
           <div class="hr"></div>
         </div>
         <p class="footer-legal">
-          Informed.OS utilizes non-partisan data streams for educational auditing. 2026 Candidate
-          filings are subject to verification by State Election Boards.
+          BeInformed uses LLMs to gather info and you should always verify with official sources in
+          case of hallucination.
         </p>
       </div>
     </footer>
   </div>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref, reactive } from 'vue'
+import { saveApiKeys } from 'src/services/InformedAPI'
+
+const showSettings = ref(false)
+const saving = ref(false)
+
+const tempKeys = reactive({
+  geocodioApiKey: '',
+  govDataApiKey: '',
+  tavilyApiKey: '',
+})
+
+const saveSettings = async () => {
+  saving.value = true
+  try {
+    await saveApiKeys({
+      GEOCODIO_API_KEY: tempKeys.geocodioApiKey,
+      GOV_DATA_API_KEY: tempKeys.govDataApiKey,
+      TAVILY_API_KEY: tempKeys.tavilyApiKey,
+    })
+
+    showSettings.value = false
+  } catch (error) {
+    console.error('Save failed:', error)
+  } finally {
+    saving.value = false
+  }
+}
+</script>
 
 <style scoped>
 .app-wrapper {
@@ -155,7 +217,6 @@
   color: #111827;
   letter-spacing: -0.05em;
   text-transform: uppercase;
-  font-style: italic;
   line-height: 1;
 }
 
@@ -165,7 +226,6 @@
   background-clip: text;
   color: transparent;
 }
-
 .live-indicator {
   display: flex;
   align-items: center;
@@ -288,6 +348,7 @@
 }
 
 .main-content {
+  padding-top: 2rem;
   flex: 1;
 }
 
@@ -331,5 +392,67 @@
   margin: 0 auto;
   line-height: 2;
   text-align: center;
+}
+
+.settings-trigger {
+  background: transparent;
+  border: none;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.settings-trigger:hover {
+  background: #f3f4f6;
+  color: #111827;
+}
+
+.settings-card {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 1.5rem;
+  overflow: hidden;
+}
+
+.glass-modal {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.settings-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.input-group label {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #4b5563;
+}
+
+.save-btn {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: 0 1.5rem;
+  border-radius: 0.75rem;
+  background: linear-gradient(to right, var(--blue-600), var(--blue-500)) !important;
 }
 </style>

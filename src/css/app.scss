@@ -57,6 +57,15 @@ h6 {
   background: linear-gradient(to right, var(--blue-600), var(--blue-400));
 }
 
+.gradient-text {
+  background: linear-gradient(to right, var(--blue-600), var(--blue-400));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  padding-right: 0.1em;
+  margin-right: -0.1em;
+}
+
 .premium-card {
   background: white;
   border: 1px solid #f3f4f6;
