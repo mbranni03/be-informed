@@ -22,10 +22,6 @@ Standard resources often leave voters overwhelmed by the complexity of local and
 - **Intelligence Dossiers**: Access high-fidelity AI-generated reports on candidate backgrounds, funding, and positions.
 - **Electoral Monitoring**: Visualize the balance of power with real-time status tracking of Senate and House seats.
 
----
-
-## Features
-
 <p align="center">
     <picture>
       <img src="public/overview_demo.png" alt="BeInformed Overview" width="800">
